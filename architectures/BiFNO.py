@@ -61,9 +61,9 @@ class BiFNO(eqx.Module):
         self.convs1_a = [normalize_conv(eqx.nn.Conv(D, n_processor_a, n_processor_a, 1, key=key), s1=s1, s2=s2) for key in keys[:N_layers]]
         self.convs2_a = [normalize_conv(eqx.nn.Conv(D, n_processor_a, n_processor_a, 1, key=key), s1=s1, s2=s2) for key in keys[N_layers:2*N_layers]]
         
-        keys = random.split(keys[-1], 2*N_layers + 1)
-        self.convs1_b = [normalize_conv(eqx.nn.Conv(D, n_processor_b, n_processor_b, 1, key=key), s1=s1, s2=s2) for key in keys[:N_layers]]
-        self.convs2_b = [normalize_conv(eqx.nn.Conv(D, n_processor_b, n_processor_b, 1, key=key), s1=s1, s2=s2) for key in keys[N_layers:2*N_layers]]
+        keys = random.split(keys[-1], 2*N_layers - 1)
+        self.convs1_b = [normalize_conv(eqx.nn.Conv(D, n_processor_b, n_processor_b, 1, key=key), s1=s1, s2=s2) for key in keys[:(N_layers-1)]]
+        self.convs2_b = [normalize_conv(eqx.nn.Conv(D, n_processor_b, n_processor_b, 1, key=key), s1=s1, s2=s2) for key in keys[(N_layers-1):(2*N_layers-2)]]
         self.A = random.normal(keys[-1], [N_layers, n_processor, n_processor] + [N_modes,]*D, dtype=jnp.complex64) * s3
 
     def __call__(self, u_a, x_a, u_b, x_b):
@@ -78,11 +78,12 @@ class BiFNO(eqx.Module):
         else:
             u_b = jnp.concatenate([x_b, u_b], 0)
         u_b = self.encoder_b(u_b)
-        
-        for conv1_a, conv2_a, conv1_b, conv2_b, A in zip(self.convs1_a, self.convs2_a, self.convs1_b, self.convs2_b, self.A):
-            u_a, u_b = self.biscale_spectral_conv(u_a, u_b, A)
-            u_a += gelu(conv2_a(gelu(conv1_a(u_a))))
-            u_b += gelu(conv2_b(gelu(conv1_b(u_b))))
+
+        for i in range(self.A.shape[0]):
+            u_a_, u_b_ = self.biscale_spectral_conv(u_a, u_b, self.A[i])
+            u_a += gelu(self.convs2_a[i](gelu(self.convs1_a[i](u_a_))))
+            if i != len(self.convs1_b):
+                u_b += gelu(self.convs2_b[i](gelu(self.convs1_b[i](u_b_))))
         u_a = self.decoder_a(u_a)
         return u_a, u_b
 
