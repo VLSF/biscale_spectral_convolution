@@ -56,8 +56,8 @@ class FNO(eqx.Module):
     def __call__(self, u, x):
         u = jnp.concatenate([x, u], 0)
         u = self.encoder(u)
-        for conv1, conv2, A in zip(self.convs1, self.convs2, self.A):
-            u += gelu(conv2(gelu(conv1(self.spectral_conv(u, A)))))
+        for i in range(self.A.shape[0]):
+            u += gelu(self.convs2[i](gelu(self.convs1[i](self.spectral_conv(u, self.A[i])))))
         u = self.decoder(u)
         return u
 
