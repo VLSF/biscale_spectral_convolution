@@ -72,18 +72,22 @@ def get_dataset_1(key, N_samples):
 
     keys = random.split(key, (N_samples, ))
     data = {
-        "init": [],
-        "sol": [],
-        "x": x
+        "features": [],
+        "targets": [],
+        "coordinates": x
     }
     for key in keys:
         u = get_initial_conditions(key, w_u, N_x) * project
         U = integrate_Burgers(u, u*0, A, B, N_newton, t)
-        data["init"].append(u)
-        data["sol"].append(U[-1])
+        data["features"].append(u)
+        data["targets"].append(U[-1])
     for key in data.keys():
         data[key] = jnp.array(data[key])
 
+    data['features'] = jnp.expand_dims(data['features'], axis=1)
+    data['targets'] = jnp.expand_dims(data['targets'], axis=1)
+    data['coordinates'] = jnp.expand_dims(data['coordinates'], axis=0)
+    
     return data
 
 def get_dataset_2(key, N_samples):
@@ -107,18 +111,22 @@ def get_dataset_2(key, N_samples):
 
     keys = random.split(key, (N_samples, ))
     data = {
-        "init": [],
-        "sol": [],
-        "x": x
+        "features": [],
+        "targets": [],
+        "coordinates": x
     }
     for key in keys:
         u = get_initial_conditions(key, w_u, N_x) * project
         u = amplitude * u / jnp.linalg.norm(u)
         U = integrate_Burgers(u, u*0, A, B, N_newton, t)
-        data["init"].append(u)
-        data["sol"].append(U[-1])
+        data["features"].append(u)
+        data["targets"].append(U[-1])
     for key in data.keys():
         data[key] = jnp.array(data[key])
+
+    data['features'] = jnp.expand_dims(data['features'], axis=1)
+    data['targets'] = jnp.expand_dims(data['targets'], axis=1)
+    data['coordinates'] = jnp.expand_dims(data['coordinates'], axis=0)
 
     return data
 
