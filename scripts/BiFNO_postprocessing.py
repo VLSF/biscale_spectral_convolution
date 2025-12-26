@@ -71,7 +71,7 @@ if __name__ == "__main__":
         if features_a is None:
             try:
                 cost = call_model.trace(features_a, coordinates_a, features_b[0], coordinates_b).lower().compile().cost_analysis()[0]['flops']
-            except"
+            except:
                 cost = call_model.trace(features_a, coordinates_a, features_b[0], coordinates_b).lower().compile().cost_analysis()['flops']
         elif features_b is None:
             try:
