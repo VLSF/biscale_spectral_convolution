@@ -56,7 +56,10 @@ if __name__ == "__main__":
         model = FNO.FNO(N_layers, N_features, N_modes, D, keys[1], s1=args['s1'], s2=0, s3=args['s3'])
         model = eqx.tree_deserialise_leaves(f'{args["results_path"]}/model_{args["hash"]}.eqx', model)
         call_model = jit(lambda a, b: model(a, b))
-        cost = call_model.trace(features[0], coordinates).lower().compile().cost_analysis()[0]['flops']
+        try:
+            cost = call_model.trace(features[0], coordinates).lower().compile().cost_analysis()[0]['flops']
+        except:
+            cost = call_model.trace(features[0], coordinates).lower().compile().cost_analysis()['flops']
         
         train_rel_errors = jnp.mean(scan(FNO_train.compute_errors, [model, features, coordinates, targets], train_ind)[1])
         val_rel_errors = jnp.mean(scan(FNO_train.compute_errors, [model, features, coordinates, targets], val_ind)[1])

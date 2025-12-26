@@ -69,11 +69,20 @@ if __name__ == "__main__":
 
         call_model = jit(lambda a, b, c, d: model(a, b, c, d)[0])
         if features_a is None:
-            cost = call_model.trace(features_a, coordinates_a, features_b[0], coordinates_b).lower().compile().cost_analysis()[0]['flops']
+            try:
+                cost = call_model.trace(features_a, coordinates_a, features_b[0], coordinates_b).lower().compile().cost_analysis()[0]['flops']
+            except"
+                cost = call_model.trace(features_a, coordinates_a, features_b[0], coordinates_b).lower().compile().cost_analysis()['flops']
         elif features_b is None:
-            cost = call_model.trace(features_a[0], coordinates_a, features_b, coordinates_b).lower().compile().cost_analysis()[0]['flops']
+            try:
+                cost = call_model.trace(features_a[0], coordinates_a, features_b, coordinates_b).lower().compile().cost_analysis()[0]['flops']
+            except:
+                cost = call_model.trace(features_a[0], coordinates_a, features_b, coordinates_b).lower().compile().cost_analysis()['flops']
         else:
-            cost = call_model.trace(features_a[0], coordinates_a, features_b[0], coordinates_b).lower().compile().cost_analysis()[0]['flops']
+            try:
+                cost = call_model.trace(features_a[0], coordinates_a, features_b[0], coordinates_b).lower().compile().cost_analysis()[0]['flops']
+            except:
+                cost = call_model.trace(features_a[0], coordinates_a, features_b[0], coordinates_b).lower().compile().cost_analysis()['flops']
         train_rel_errors = jnp.mean(scan(BiFNO_train.compute_errors, [model, features_a, coordinates_a, features_b, coordinates_b, targets], train_ind)[1])
         val_rel_errors = jnp.mean(scan(BiFNO_train.compute_errors, [model, features_a, coordinates_a, features_b, coordinates_b, targets], val_ind)[1])
         test_rel_errors = jnp.mean(scan(BiFNO_train.compute_errors, [model, features_a, coordinates_a, features_b, coordinates_b, targets], test_ind)[1])
