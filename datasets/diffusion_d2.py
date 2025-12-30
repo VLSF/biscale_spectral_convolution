@@ -106,6 +106,6 @@ def generate_dataset(key, N_samples):
 if __name__ == "__main__":
     dataset_path = sys.argv[1]
     key = random.PRNGKey(3359)
-    N_samples = 2
+    N_samples = 1000
     data = generate_dataset(key, N_samples)
     jnp.savez(dataset_path, **data)
