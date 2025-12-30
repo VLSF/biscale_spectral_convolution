@@ -1,3 +1,6 @@
+# Zabusky-Kruskal scheme for KdV, https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.15.240
+# See also https://scicomp.stackexchange.com/questions/33414/confusion-about-zabusky-and-kruskals-stepper-for-the-kdv-equation
+
 import sys
 import jax.numpy as jnp
 
