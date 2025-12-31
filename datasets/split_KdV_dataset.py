@@ -9,7 +9,7 @@ if __name__ == "__main__":
     d1_data = {
         "features": data['solutions'][:, :1],
         "targets": data['solutions'][:, -1:],
-        "coordinates": data['x']
+        "coordinates": np.expand_dims(data['x'], 0)
     }
     np.savez(save_d1_path, **d1_data)
     del d1_data
