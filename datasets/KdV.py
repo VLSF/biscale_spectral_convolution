@@ -90,6 +90,6 @@ if __name__ == "__main__":
     dataset_path = sys.argv[1]
     save_logs_to = sys.argv[2]
     key = random.PRNGKey(444111)
-    N_samples = 25
+    N_samples = 1000
     data = generate_dataset(key, N_samples, save_logs_to)
     jnp.savez(dataset_path, **data)
