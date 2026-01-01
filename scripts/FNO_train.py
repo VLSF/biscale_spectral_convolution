@@ -199,7 +199,7 @@ if __name__ == "__main__":
     N_modes = args["N_modes"]
     model = FNO.FNO(N_layers, N_features, N_modes, D, keys[1], s1=args['s1'], s2=0, s3=args['s3'])
     
-    model_size = sum(tree_map(lambda x: jnp.size(x) if not (x is None) else 0, tree_flatten(model)[0], is_leaf=eqx.is_array))
+    model_size = sum(jax.tree.map(lambda x: (2*jnp.size(x) if x.dtype == jnp.complex64 else jnp.size(x)) if not (x is None) else 0, jax.tree.flatten(model)[0], is_leaf=eqx.is_array))
     learning_rate = optax.exponential_decay(args["learning_rate"], N_drop, args["gamma"])
     if args["optim"] == "lion":
         optim = optax.lion(learning_rate=learning_rate)
