@@ -6,6 +6,7 @@ import equinox as eqx
 import optax
 import hashlib
 import argparse
+import jax
 
 from jax import random, vmap
 from jax.lax import scan
