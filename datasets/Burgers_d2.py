@@ -132,6 +132,7 @@ def get_dataset_2(key, N_samples):
 
 if __name__ == "__main__":
     dataset_name = sys.argv[1]
+    dataset_path = sys.argv[2]
     N_samples = 1000
     if dataset_name == "1":
         key = random.PRNGKey(67)
@@ -139,4 +140,4 @@ if __name__ == "__main__":
     else:
         key = random.PRNGKey(167)
         data = get_dataset_2(key, N_samples)
-    jnp.savez(f"Burgers_dataset_d2_{dataset_name}.npz", **data)
+    jnp.savez(dataset_path, **data)
