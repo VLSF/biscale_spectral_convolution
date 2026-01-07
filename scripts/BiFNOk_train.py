@@ -56,9 +56,9 @@ def l2_loss(model, feature_a, x_a, feature_b, x_b, target):
     return error
 
 def batch_l2_loss(model, feature_a, x_a, feature_b, x_b, target):
-    if features_a is None:
+    if feature_a is None:
         in_axes = (None, None, None, 0, None, 0)
-    elif features_b is None:
+    elif feature_b is None:
         in_axes = (None, 0, None, None, None, 0)
     else:
         in_axes = (None, 0, None, 0, None, 0)
