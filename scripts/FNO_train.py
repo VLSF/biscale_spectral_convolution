@@ -46,7 +46,7 @@ def compute_errors(carry, ind):
     return carry, error
 
 def l2_loss(model, feature, x, target):
-    X = model(feature, x)[0]
+    X = model(feature, x)
     error = jnp.sum((X - target)**2)
     return error
 
