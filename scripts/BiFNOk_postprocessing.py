@@ -64,7 +64,7 @@ if __name__ == "__main__":
         test_ind = -(1 + jnp.arange(args["N_test"]))
         
         N_modes = args["N_modes"]
-        kernel_size = args["kernel_size"]
+        kernel_size = args["kernel_size"].item()
         model = BiFNOk.BiFNOk(N_layers, N_features_a, N_features_b, N_modes, D, kernel_size, keys[1], s1=args['s1'], s2=0, s3=args['s3'])
         model = eqx.tree_deserialise_leaves(f'{args["results_path"]}/model_{args["hash"]}.eqx', model)
 
