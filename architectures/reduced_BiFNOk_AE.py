@@ -138,15 +138,15 @@ class coeff_encoder(eqx.Module):
     convs: list
     linear: eqx.Module
 
-    def __init__(self, N_features_in, N_features_out, D, J_b, kernel_size, key):
+    def __init__(self, N_features_in, N_features_out, D, J_b, kernel_size, key, s1=1.0, s2=1.0):
         keys = random.split(key)
         convs = []
         stride = 2
         padding = kernel_size // 2
         for key in random.split(keys[0], J_b):
-            convs.append(eqx.nn.Conv(D, N_features_in, N_features_in, kernel_size=kernel_size, stride=stride, padding=padding, key=key))
+            convs.append(normalize_conv(eqx.nn.Conv(D, N_features_in, N_features_in, kernel_size=kernel_size, stride=stride, padding=padding, key=key), s1=s1, s2=s2))
         self.convs = convs
-        self.linear = eqx.nn.Conv(D, N_features_in, N_features_out, 1, key=keys[1])
+        self.linear = normalize_conv(eqx.nn.Conv(D, N_features_in, N_features_out, 1, key=keys[1]), s1=s1, s2=s2)
 
     def __call__(self, u_b):
         for c in self.convs:
@@ -158,15 +158,15 @@ class coeff_decoder(eqx.Module):
     convs: list
     linear: eqx.Module
 
-    def __init__(self, N_features_in, N_features_out, D, J_b, kernel_size, key):
+    def __init__(self, N_features_in, N_features_out, D, J_b, kernel_size, key, s1=1.0, s2=1.0):
         keys = random.split(key)
         convs = []
         stride = 2
         padding = kernel_size // 2
         for key in random.split(keys[0], J_b):
-            convs.append(eqx.nn.ConvTranspose(D, N_features_out, N_features_out, kernel_size=kernel_size, stride=stride, padding=padding, output_padding=1, key=key))
+            convs.append(normalize_conv(eqx.nn.ConvTranspose(D, N_features_out, N_features_out, kernel_size=kernel_size, stride=stride, padding=padding, output_padding=1, key=key), s1=s1, s2=s2))
         self.convs = convs
-        self.linear = eqx.nn.Conv(D, N_features_in, N_features_out, 1, key=keys[1])
+        self.linear = normalize_conv(eqx.nn.Conv(D, N_features_in, N_features_out, 1, key=keys[1]), s1=s1, s2=s2)
 
     def __call__(self, u_b):
         shape = [-1] + [1,]*(self.convs[0].weight.ndim - 2)
@@ -186,8 +186,8 @@ class reduced_BiFNOk_AE(eqx.Module):
     def __init__(self, N_layers, N_processor, N_modes, D, J_b, N_f_b, kernel_size, n_basis, key, s1=1.0, s2=1.0, s3=1.0):
         keys = random.split(key, 4)
         self.encoder = BiFNOk(N_layers, [D + 1, N_processor, 1], [N_f_b, N_processor, N_processor], N_modes, D,  kernel_size, keys[0], s1=s1, s2=s2, s3=s3)
-        self.coeff_encoder = coeff_encoder(N_processor, n_basis, D, J_b, kernel_size, keys[1])
-        self.coeff_decoder = coeff_decoder(n_basis, N_processor, D, J_b, kernel_size, keys[1])
+        self.coeff_encoder = coeff_encoder(N_processor, n_basis, D, J_b, kernel_size, keys[1], s1=s1, s2=s2)
+        self.coeff_decoder = coeff_decoder(n_basis, N_processor, D, J_b, kernel_size, keys[1], s1=s1, s2=s2)
         self.decoder = BiFNOk(N_layers, [D, N_processor, 1], [N_f_b + N_processor, N_processor, 1], N_modes, D,  kernel_size, keys[2], s1=s1, s2=s2, s3=s3)
         self.x_b = random.normal(keys[2], [2,] + [N_f_b,] + [2**J_b,]*D)
 
