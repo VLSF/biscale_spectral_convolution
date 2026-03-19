@@ -113,12 +113,12 @@ if __name__ == "__main__":
 
     if not os.path.isfile(f'{Args["save_path"]}/postprocessing_reconstruction_quality.csv'):
         with open(f'{Args["save_path"]}/postprocessing_reconstruction_quality.csv', "w") as f:
-            header = 'equation,J_encoder_train,J_decoder_train,J_encoder_test,J_decoder_test,reconstruction_error'
+            header = 'equation,n_basis,J_encoder_train,J_decoder_train,J_encoder_test,J_decoder_test,reconstruction_error'
             f.write(header)
 
     if not os.path.isfile(f'{Args["save_path"]}/postprocessing_codes_quality.csv'):
         with open(f'{Args["save_path"]}/postprocessing_codes_quality.csv', "w") as f:
-            header = 'equation,J_encoder_train,J_encoder_test,code_error'
+            header = 'equation,n_basis,J_encoder_train,J_encoder_test,code_error'
             f.write(header)
 
     res = pd.read_csv(results_path)
@@ -171,7 +171,7 @@ if __name__ == "__main__":
                 
                 test_ind = -(1 + jnp.arange(args["N_test"]))
                 test_rel_errors = jnp.mean(scan(compute_errors, [model, x_encoder_, x_decoder_, targets_encoder_, targets_decoder_], test_ind)[1])
-                to_append += f"\n{args['dataset_path'].split('/')[-1].split('.')[0]},{args['J_encoder']},{args['J_decoder']},{J_encoder_new},{J_decoder_new},{test_rel_errors}"
+                to_append += f"\n{args['dataset_path'].split('/')[-1].split('.')[0]},{n_basis},{args['J_encoder']},{args['J_decoder']},{J_encoder_new},{J_decoder_new},{test_rel_errors}"
                 
         with open(f'{Args["save_path"]}/postprocessing_reconstruction_quality.csv', "a") as f:
             f.write(to_append)
@@ -195,7 +195,7 @@ if __name__ == "__main__":
             test_ind = -(1 + jnp.arange(args["N_test"]))
             codes = scan(encode_dataset, [model, x_encoder_, targets_encoder_], test_ind)[1]
             test_rel_errors = jnp.mean(jnp.linalg.norm(gt_codes - codes, axis=1) / gt_norm)
-            to_append += f"\n{args['dataset_path'].split('/')[-1].split('.')[0]},{args['J_encoder']},{J_encoder_new},{test_rel_errors}"
+            to_append += f"\n{args['dataset_path'].split('/')[-1].split('.')[0]},{n_basis},{args['J_encoder']},{J_encoder_new},{test_rel_errors}"
     
         with open(f'{Args["save_path"]}/postprocessing_codes_quality.csv', "a") as f:
             f.write(to_append)
