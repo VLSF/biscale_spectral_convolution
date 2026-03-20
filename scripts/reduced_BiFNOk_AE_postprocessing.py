@@ -158,24 +158,27 @@ if __name__ == "__main__":
         n_basis = args["n_basis"].item()
         model = MLP_BiFNOk_AE.MLP_BiFNOk_AE(N_layers, N_processor, N_modes, D, J_b, N_f_b, kernel_size, n_basis, keys[1], s1=args['s1'], s2=0, s3=args['s3'])
         model = eqx.tree_deserialise_leaves(res_['results_path'] + "/" + f"model_{res_['hash']}.eqx", model)
-    
+
         to_append = ""
         # overall quality of reconstruction depending on the resolution of input and output
-        for J_encoder_new in [3, 2, 1, 0]:
-            for J_decoder_new in [3, 2, 1, 0]:
+        for J_encoder_new in [4, 3, 2, 1, 0]:
+            for J_decoder_new in [4, 3, 2, 1, 0]:
                 targets_encoder_ = subsample_field(targets[perm], J_encoder_new , D)
                 targets_decoder_ = subsample_field(targets[perm], J_decoder_new, D)
                 
-                x_encoder_ = subsample_field(np.expand_dims(data['coordinates'], 0), J_encoder_new , D)[0]
+                x_encoder_ = subsample_field(np.expand_dims(data['coordinates'], 0), J_encoder_new, D)[0]
                 x_decoder_ = subsample_field(np.expand_dims(data['coordinates'], 0), J_decoder_new, D)[0]
-                
-                test_ind = -(1 + jnp.arange(args["N_test"]))
-                test_rel_errors = jnp.mean(scan(compute_errors, [model, x_encoder_, x_decoder_, targets_encoder_, targets_decoder_], test_ind)[1])
-                to_append += f"\n{args['dataset_path'].split('/')[-1].split('.')[0]},{n_basis},{args['J_encoder']},{args['J_decoder']},{J_encoder_new},{J_decoder_new},{test_rel_errors}"
-                
+
+                if x_encoder_.shape[-1] < 32 or x_decoder_.shape[-1] < 32:
+                    pass
+                else:
+                    test_ind = -(1 + jnp.arange(args["N_test"]))
+                    test_rel_errors = jnp.mean(scan(compute_errors, [model, x_encoder_, x_decoder_, targets_encoder_, targets_decoder_], test_ind)[1])
+                    to_append += f"\n{args['dataset_path'].split('/')[-1].split('.')[0]},{n_basis},{args['J_encoder']},{args['J_decoder']},{J_encoder_new},{J_decoder_new},{test_rel_errors}"
+                    
         with open(f'{Args["save_path"]}/postprocessing_reconstruction_quality.csv', "a") as f:
             f.write(to_append)
-    
+        
         # distance between codes for distinct resolution of encoder
         test_ind = -(1 + jnp.arange(args["N_test"]))
         targets_encoder = subsample_field(targets[perm], args['J_encoder'], D)
@@ -188,14 +191,16 @@ if __name__ == "__main__":
         gt_norm = jnp.linalg.norm(gt_codes, axis=1)
 
         to_append = ""
-        for J_encoder_new in [3, 2, 1, 0]:
+        for J_encoder_new in [4, 3, 2, 1, 0]:
             targets_encoder_ = subsample_field(targets[perm], J_encoder_new , D)
             x_encoder_ = subsample_field(np.expand_dims(data['coordinates'], 0), J_encoder_new , D)[0]
-            
-            test_ind = -(1 + jnp.arange(args["N_test"]))
-            codes = scan(encode_dataset, [model, x_encoder_, targets_encoder_], test_ind)[1]
-            test_rel_errors = jnp.mean(jnp.linalg.norm(gt_codes - codes, axis=1) / gt_norm)
-            to_append += f"\n{args['dataset_path'].split('/')[-1].split('.')[0]},{n_basis},{args['J_encoder']},{J_encoder_new},{test_rel_errors}"
+            if x_encoder_.shape[-1] < 32:
+                pass
+            else:
+                test_ind = -(1 + jnp.arange(args["N_test"]))
+                codes = scan(encode_dataset, [model, x_encoder_, targets_encoder_], test_ind)[1]
+                test_rel_errors = jnp.mean(jnp.linalg.norm(gt_codes - codes, axis=1) / gt_norm)
+                to_append += f"\n{args['dataset_path'].split('/')[-1].split('.')[0]},{n_basis},{args['J_encoder']},{J_encoder_new},{test_rel_errors}"
     
         with open(f'{Args["save_path"]}/postprocessing_codes_quality.csv', "a") as f:
             f.write(to_append)
