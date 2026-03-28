@@ -83,7 +83,11 @@ class GKN(eqx.Module):
             w = gelu(w)
             w = c(w)
         output = jnp.zeros([u_.shape[0], x1_.shape[1]])
+        counter = jnp.zeros([u_.shape[0], x1_.shape[1]])
+        counter = counter.at[:, ind1].add(0*u_[:, ind0] + 1)
+        counter = counter + (counter == 0.0)
         output = output.at[:, ind1].add(w*u_[:, ind0])
+        output = output / counter
         output = output.reshape([u_.shape[0],] + list(s))
         return output
         
