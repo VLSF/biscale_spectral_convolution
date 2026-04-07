@@ -171,7 +171,7 @@ def get_argparser():
         },
         "-GKN_R": {
             "default": 0.25,
-            "type": int,
+            "type": float,
             "help": "number of layers in graph kernel network"
         },
         "-key": {
