@@ -77,7 +77,7 @@ class GKN(eqx.Module):
         u_ = u.reshape(u.shape[0], -1)
         x0_ = x0.reshape(x0.shape[0], -1)
         x1_ = x1.reshape(x1.shape[0], -1)
-        w = jnp.concatenate([u_[:, ind0], u_[:, ind1], x0_[:, ind0], x1_[:, ind0]], axis=0)
+        w = jnp.concatenate([u_[:, ind0], u_[:, ind1], x0_[:, ind0], x1_[:, ind1]], axis=0)
         w = self.convs[0](w)
         for c in self.convs[1:]:
             w = gelu(w)
