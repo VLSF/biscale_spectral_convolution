@@ -193,7 +193,7 @@ def get_argparser():
         },
         "-GKN_layers": {
             "default": 2,
-            "type": float,
+            "type": int,
             "help": "radius of GKN for building KNN graph"
         },
         "-GKN_R": {
